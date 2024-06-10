@@ -1,37 +1,35 @@
 # views.py
 
-from rest_framework import generics, status
+from rest_framework import generics, permissions
 from rest_framework.response import Response
-from rest_framework.decorators import api_view
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
-from .serializers import RegisterSerializer, UserSerializer
-from rest_framework.views import APIView
-from rest_framework.permissions import IsAuthenticated
+from .serializers import RegisterSerializer, LoginSerializer, UserSerializer
+
 
 class RegisterView(generics.CreateAPIView):
     queryset = User.objects.all()
     serializer_class = RegisterSerializer
 
-class SignInView(APIView):
-    def post(self, request):
-        user = authenticate(username=request.data['username'], password=request.data['password'])
-        if user is not None:
-            refresh = RefreshToken.for_user(user)
+class LoginView(generics.GenericAPIView):
+    serializer_class = LoginSerializer
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = authenticate(username=serializer.validated_data['username'], password=serializer.validated_data['password'])
+        if user:
             return Response({
-                'refresh': str(refresh),
-                'access': str(refresh.access_token),
+                'token': serializer.get_token(serializer.validated_data),
                 'user': UserSerializer(user).data
             })
-        else:
-            return Response({"detail": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
+        return Response({'error': 'Invalid Credentials'}, status=400)
+    
+class ProfileView(generics.RetrieveAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = UserSerializer
 
-
-class ProtectedView(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def get(self, request):
-        content = {'message': 'This is a protected view'}
-        return Response(content)
+    def get_object(self):
+        return self.request.user
 
