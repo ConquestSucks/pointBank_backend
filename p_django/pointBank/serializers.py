@@ -1,31 +1,26 @@
 from rest_framework import serializers
-from django.contrib.auth.models import User
-from rest_framework_simplejwt.tokens import RefreshToken
+from .models import User, Ticket
 
-class RegisterSerializer(serializers.ModelSerializer):
+class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['username', 'password', 'email']
+        fields = ['login', 'password', 'email']
         extra_kwargs = {'password': {'write_only': True}}
 
     def create(self, validated_data):
         user = User.objects.create_user(
-            username=validated_data['username'],
-            password=validated_data['password'],
-            email=validated_data['email']
+            login=validated_data['login'],
+            email=validated_data['email'],
+            password=validated_data['password']
         )
         return user
-    
-class LoginSerializer(serializers.Serializer):
-    username = serializers.CharField()
-    password = serializers.CharField(write_only=True)
-    token = serializers.SerializerMethodField()
 
-    def get_token(self, obj):
-        user = User.objects.get(username=obj['username'])
-        return str(RefreshToken.for_user(user).access_token)
-    
-class UserSerializer(serializers.ModelSerializer):
+class TicketSerializer(serializers.ModelSerializer):
     class Meta:
-        model = User
-        fields = ['id', 'username', 'email']
+        model = Ticket
+        fields = ['departure', 'arrival', 'from_location', 'to_location']
+
+
+class LoginSerializer(serializers.Serializer):
+    login = serializers.CharField()
+    password = serializers.CharField(write_only=True)
