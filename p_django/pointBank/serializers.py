@@ -4,7 +4,7 @@ from .models import User, Ticket
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['login', 'password', 'email']
+        fields = ['id','login', 'password', 'email', 'tickets']
         extra_kwargs = {'password': {'write_only': True}}
 
     def create(self, validated_data):
@@ -18,7 +18,7 @@ class UserSerializer(serializers.ModelSerializer):
 class TicketSerializer(serializers.ModelSerializer):
     class Meta:
         model = Ticket
-        fields = ['departure', 'arrival', 'from_location', 'to_location']
+        fields = ['id','departure', 'arrival', 'from_location', 'to_location']
 
 
 class LoginSerializer(serializers.Serializer):
