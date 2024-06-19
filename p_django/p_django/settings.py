@@ -4,7 +4,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = 'django-insecure--%)07d*lto%_qm=5fx42^#mu(#&ut!0y@0)n=otsb6n*(lky28'
 
-DEBUG = True
+DEBUG = False
 
 AUTH_USER_MODEL = 'pointBank.User' 
 
