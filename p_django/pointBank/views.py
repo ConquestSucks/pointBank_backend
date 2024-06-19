@@ -90,7 +90,7 @@ class BuyTicketView(APIView):
             return Response({"error": "Ticket not found"}, status=404)
 
         request.user.tickets.add(ticket)
-        return Response({"message": "Ticket purchased successfully"}, status=200)
+        return Response({"message": "Билет успешно забронирован"}, status=200)
 
 class UserTicketsView(APIView):
     permission_classes = [IsAuthenticated]
