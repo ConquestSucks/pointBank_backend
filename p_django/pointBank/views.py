@@ -10,6 +10,8 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.exceptions import TokenError 
 from .serializers import UserSerializer, TicketSerializer, LoginSerializer
 from .models import User, Ticket
+import random
+from scripts import mail
 
 locations = [
     "Самара",
@@ -27,6 +29,45 @@ def autocomplete(request):
     suggestions = [location for location in locations if query.lower() in location.lower()]
 
     return Response(suggestions)
+
+@api_view(['POST'])
+def send_code(request):
+    email = request.data.get('email', '')
+    if not email:
+        return Response({'error': 'No email provided'}, status=400)
+
+    try:
+        user = User.objects.get(email=email)
+    except User.DoesNotExist:
+        return Response({'error': 'User with this email does not exist'}, status=404)
+
+    code = "".join(random.sample("123456789", 4))
+    user.lastCode = code
+    user.save()
+
+    mail.send_ya_mail([email], f'Ваш код подтверждения {code}')
+    
+    return Response({'message': 'Confirmation code sent'}, status=status.HTTP_200_OK)
+
+@api_view(['POST'])
+def check_code(request):
+    email = request.data.get('email', '')
+    code = request.data.get('code', '')
+
+    if not email or not code:
+        return Response({'error': 'Email and code are required'}, status=400)
+
+    try:
+        user = User.objects.get(email=email)
+    except User.DoesNotExist:
+        return Response({'error': 'User with this email does not exist'}, status=404)
+
+    if user.lastCode == code:
+        user.isEmailConfirmed = True
+        user.save()
+        return Response({'message': 'Email confirmed successfully'}, status=status.HTTP_200_OK)
+    else:
+        return Response({'error': 'Invalid code'}, status=400)
 
 class RegisterView(generics.CreateAPIView):
     queryset = User.objects.all()

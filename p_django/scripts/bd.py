@@ -13,8 +13,8 @@ def populate_tickets():
         "Тоцкое", 
         "Сорочинск"
     ]
-    start_date = datetime(2024, 6, 15)
-    end_date = datetime(2024, 6, 30)
+    start_date = datetime(2024, 6, 25)
+    end_date = datetime(2024, 7, 30)
     delta = timedelta(days=1)
 
     current_date = start_date

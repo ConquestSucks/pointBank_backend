@@ -20,6 +20,8 @@ class UserManager(BaseUserManager):
 class User(AbstractBaseUser, PermissionsMixin):
     login = models.CharField(max_length=30, unique=True)
     email = models.EmailField(unique=True)
+    isEmailConfirmed = models.BooleanField(default=False)
+    lastCode = models.IntegerField(max_length=4, null=True)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     tickets = models.ManyToManyField('Ticket', blank=True)
